@@ -5,6 +5,7 @@ export default function Avatar({ src, size }) {
   return (
     <AvatarFigure size={size}>
       <img src={src ?? defaultUser} alt="아바타이미지" />
+      {/* <input onchange="onFileChange(event)" id="imgInput" type="file" accept="images/*" /> */}
     </AvatarFigure>
   );
 }
