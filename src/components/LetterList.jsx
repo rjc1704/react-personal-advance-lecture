@@ -4,11 +4,12 @@ import LetterCard from "./LetterCard";
 
 export default function LetterList() {
   const activeMember = useSelector((state) => state.member);
-  const letters = useSelector((state) => state.letters);
+  const { letters } = useSelector((state) => state.letters);
 
   const filteredLetters = letters.filter(
     (letter) => letter.writedTo === activeMember
   );
+
   return (
     <ListWrapper>
       {filteredLetters.length === 0 ? (

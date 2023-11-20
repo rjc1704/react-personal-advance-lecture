@@ -2,12 +2,17 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useNavigate } from "react-router-dom";
 import { logout } from "redux/modules/authSlice";
+import { __getLetters } from "redux/modules/letterSlice";
 import styled from "styled-components";
 
 export default function Layout() {
   const isLogin = useSelector((state) => state.auth.isLogin);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    dispatch(__getLetters());
+  }, [dispatch]);
 
   useEffect(() => {
     if (!isLogin) {

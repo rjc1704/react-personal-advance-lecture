@@ -35,7 +35,7 @@ export default function Login() {
       }
     } else {
       // 회원가입 요청
-      if (!id || !password | !nickname)
+      if (!id || !password || !nickname)
         return alert("아이디, 비밀번호, 닉네임은 필수값입니다.");
 
       const result = await api.post("/register", {
