@@ -1,17 +1,30 @@
 import Avatar from "components/common/Avatar";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 import heic2any from "heic2any";
-import { authApi } from "api";
+import { authApi, jsonApi } from "api";
 import Button from "components/common/Button";
+import { useDispatch } from "react-redux";
+import { setProfile } from "redux/modules/authSlice";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getProfile } from "api/queryFns";
 
 export default function Profile() {
+  const dispatch = useDispatch();
   const [imgFile, setImgFile] = useState(null);
-  const [imgUrl, setImgUrl] = useState(null);
-  const [nickname, setNickname] = useState("");
   const [editingNickname, setEditingNickname] = useState("");
-  const [id, setId] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+
+  const queryClient = useQueryClient();
+  const {
+    data: profileData,
+    refetch: refetchProfile,
+    isLoading,
+  } = useQuery({
+    queryKey: ["profile"],
+    queryFn: getProfile,
+  });
+
   const previewImg = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -30,23 +43,18 @@ export default function Profile() {
       });
 
       const imageUrl = URL.createObjectURL(blob);
-      setImgUrl(imageUrl);
+
+      queryClient.setQueryData(["profile"], (prev) => ({
+        ...prev,
+        avatar: imageUrl,
+      }));
     } else {
       const objUrl = URL.createObjectURL(file);
-      setImgUrl(objUrl);
-    }
-  };
-
-  const getProfile = async () => {
-    try {
-      const {
-        data: { id, nickname, avatar },
-      } = await authApi.get("/user");
-      setId(id);
-      setNickname(nickname);
-      setImgUrl(avatar);
-    } catch (error) {
-      console.error(error);
+      // setImgUrl(objUrl);
+      queryClient.setQueryData(["profile"], (prev) => ({
+        ...prev,
+        avatar: objUrl,
+      }));
     }
   };
 
@@ -62,37 +70,56 @@ export default function Profile() {
       formData.append("nickname", editingNickname);
     }
 
-    await authApi.post("/profile", formData, { isFile: true });
+    const { data } = await authApi.post("/profile", formData, { isFile: true });
 
-    getProfile();
+    const newProfile = { ...data };
+    delete newProfile.message;
+    delete newProfile.success;
+    dispatch(setProfile(newProfile));
+    refetchProfile();
+
+    // db.json에도 프로필 변경사항 반영
+    const { data: myLetters } = await jsonApi.get(
+      `/letters?userId=${localStorage.getItem("userId")}`,
+      newProfile
+    );
+    if (myLetters.length > 0) {
+      const letterIds = myLetters.map((letter) => letter.id);
+      for (const letterId of letterIds) {
+        await jsonApi.patch(`/letters/${letterId}`, newProfile);
+      }
+    }
 
     setIsEditing(false);
     setEditingNickname("");
   };
 
-  useEffect(() => {
-    getProfile();
-  }, []);
+  // useEffect(() => {
+  //   getProfile();
+  // }, []);
+  if (isLoading) {
+    return <p>로딩중...</p>;
+  }
   return (
     <Container>
       <ProfileWrapper>
         <h1>프로필 관리</h1>
         <label>
-          <Avatar src={imgUrl} size="large" id="imgInput" />
+          <Avatar src={profileData.avatar} size="large" id="imgInput" />
           <input onChange={previewImg} type="file" accept="image/*" />
         </label>
         {isEditing ? (
           <input
             name="editing"
             autoFocus
-            defaultValue={nickname}
+            defaultValue={profileData.nickname}
             onChange={(event) => setEditingNickname(event.target.value)}
           />
         ) : (
-          <Nickname>{nickname}</Nickname>
+          <Nickname>{profileData.nickname}</Nickname>
         )}
 
-        <Id>{id}</Id>
+        <Id>{profileData.id}</Id>
         <BtnsWrapper>
           {isEditing ? (
             <>

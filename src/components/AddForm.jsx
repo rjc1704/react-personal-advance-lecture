@@ -5,35 +5,39 @@ import Button from "./common/Button";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addLetter } from "api/mutateFns";
+import { useSelector } from "react-redux";
 
 export default function AddForm() {
   // const { setLetters } = useContext(LetterContext);
   // const dispatch = useDispatch();
+  const { userId, avatar, nickname } = useSelector((state) => state.auth);
+
   const queryClient = useQueryClient();
   const { mutate: mutateToAdd } = useMutation({
     mutationFn: addLetter,
     onSuccess: () => {
       queryClient.invalidateQueries(["letters"]);
-      setNickname("");
+      // setNickname("");
       setContent("");
     },
   });
 
-  const [nickname, setNickname] = useState("");
+  // const [nickname, setNickname] = useState("");
   const [content, setContent] = useState("");
   const [member, setMember] = useState("카리나");
 
   const onAddLetter = (event) => {
     event.preventDefault();
-    if (!nickname || !content) return alert("닉네임과 내용은 필수값입니다.");
+    if (!content) return alert("닉네임과 내용은 필수값입니다.");
 
     const newLetter = {
       id: uuid(),
       nickname,
       content,
-      avatar: null,
+      avatar,
       writedTo: member,
       createdAt: new Date(),
+      userId,
     };
     mutateToAdd(newLetter);
     // dispatch(__addLetter(newLetter));
@@ -45,12 +49,7 @@ export default function AddForm() {
     <Form onSubmit={onAddLetter}>
       <InputWrapper>
         <label>닉네임:</label>
-        <input
-          onChange={(event) => setNickname(event.target.value)}
-          value={nickname}
-          placeholder="최대 20글자까지 작성할 수 있습니다."
-          maxLength={20}
-        />
+        <span>{nickname}</span>
       </InputWrapper>
       <InputWrapper>
         <label>내용:</label>
@@ -101,6 +100,10 @@ const InputWrapper = styled.div`
   & textarea {
     resize: none;
     height: 80px;
+  }
+  & span {
+    width: 100%;
+    color: white;
   }
 `;
 

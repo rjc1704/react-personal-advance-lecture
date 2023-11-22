@@ -1,9 +1,15 @@
-import axios from "axios";
+import { authApi, jsonApi } from "api";
 
-export const addLetter = (newLetter) =>
-  axios.post("http://localhost:5000/letters", newLetter);
+export const addLetter = (newLetter) => jsonApi.post("/letters", newLetter);
 
 export const editLetter = ({ id, editingText }) =>
-  axios.patch(`http://localhost:5000/letters/${id}`, { content: editingText });
-export const deleteLetter = (id) =>
-  axios.delete(`http://localhost:5000/letters/${id}`);
+  jsonApi.patch(`/letters/${id}`, { content: editingText });
+
+export const deleteLetter = (id) => jsonApi.delete(`/letters/${id}`);
+
+export const register = ({ id, password, nickname }) =>
+  authApi.post("/register", {
+    id,
+    password,
+    nickname,
+  });

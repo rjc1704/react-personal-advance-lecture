@@ -1,13 +1,13 @@
 import styled from "styled-components";
 import Button from "components/common/Button";
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { login } from "redux/modules/authSlice";
-import { api } from "api";
+import { authApi } from "api";
+import { useMutation } from "@tanstack/react-query";
+import { register } from "api/mutateFns";
 
 export default function Login() {
-  const isLogin = useSelector((state) => state.auth.isLogin);
   const dispatch = useDispatch();
 
   const [id, setId] = useState("");
@@ -15,7 +15,15 @@ export default function Login() {
   const [nickname, setNickname] = useState("");
   const [inLogin, setInLogin] = useState(true);
 
-  const navigate = useNavigate();
+  const { mutate: mutateToRegister } = useMutation({
+    mutationFn: register,
+    onSuccess: () => {
+      setInLogin(true);
+      setId("");
+      setPassword("");
+      alert("회원가입에 성공했습니다. 로그인 해주세요.");
+    },
+  });
 
   const handleAuth = async (event) => {
     event.preventDefault();
@@ -23,39 +31,27 @@ export default function Login() {
     if (inLogin) {
       // 서버로 로그인 요청 후 성공 시 상태변경
       if (!id || !password) return alert("아이디와 비밀번호는 필수값입니다.");
-
-      const result = await api.post("/login", {
-        id,
-        password,
-      });
-      const accessToken = result.data.accessToken;
-
-      if (result.status === 200) {
-        dispatch(login(accessToken));
+      try {
+        const result = await authApi.post("/login", {
+          id,
+          password,
+        });
+        const { accessToken, userId, avatar, nickname } = result.data;
+        if (result.status === 200) {
+          dispatch(login({ accessToken, userId, avatar, nickname }));
+        }
+      } catch (error) {
+        alert(error.response.data.message);
       }
     } else {
       // 회원가입 요청
       if (!id || !password || !nickname)
         return alert("아이디, 비밀번호, 닉네임은 필수값입니다.");
 
-      const result = await api.post("/register", {
-        id,
-        password,
-        nickname,
-      });
-      if (result?.data.success) {
-        // 회원가입 성공 처리
-        setInLogin(true);
-        return alert("회원가입에 성공했습니다. 로그인 해주세요.");
-      }
+      await mutateToRegister({ id, password, nickname });
     }
   };
 
-  useEffect(() => {
-    if (isLogin) {
-      navigate("/");
-    }
-  }, [isLogin, navigate]);
   return (
     <Container>
       <Form onSubmit={handleAuth}>

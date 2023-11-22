@@ -1,18 +1,13 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, Link, useNavigate } from "react-router-dom";
 import { logout } from "redux/modules/authSlice";
-import { __getLetters } from "redux/modules/letterSlice";
 import styled from "styled-components";
 
 export default function Layout() {
   const isLogin = useSelector((state) => state.auth.isLogin);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    dispatch(__getLetters());
-  }, [dispatch]);
 
   useEffect(() => {
     if (!isLogin) {
@@ -22,9 +17,14 @@ export default function Layout() {
   return (
     <>
       <Nav>
-        <div onClick={() => navigate("/")}>HOME</div>
+        <Link to="/">
+          <div>HOME</div>
+        </Link>
         <section>
-          <div onClick={() => navigate("/profile")}>내 프로필</div>
+          <Link to="/profile">
+            <div>내 프로필</div>
+          </Link>
+
           <div onClick={() => dispatch(logout())}>로그아웃</div>
         </section>
       </Nav>
