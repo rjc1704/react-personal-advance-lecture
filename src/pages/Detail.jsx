@@ -1,44 +1,64 @@
 import Avatar from "components/common/Avatar";
 import Button from "components/common/Button";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { getFormattedDate } from "util/date";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  deleteLetter,
-  editLetter,
-  __deleteLetter,
-  __editLetter,
-} from "redux/modules/letterSlice";
 
-import axios from "axios";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getLettersFromDB } from "api/queryFns";
+import { deleteLetter, editLetter } from "api/mutateFns";
 
 export default function Detail() {
-  const dispatch = useDispatch();
-  const { letters } = useSelector((state) => state.letters);
-
   const [isEditing, setIsEditing] = useState(false);
   const [editingText, setEditingText] = useState("");
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const detailData = letters.find((letter) => letter.id === id);
+  const queryClient = useQueryClient();
+  const { mutate: mutateToDelete } = useMutation({
+    mutationFn: deleteLetter,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["letters"]);
+      navigate("/");
+    },
+  });
+  const { mutate: mutateToEdit } = useMutation({
+    mutationFn: editLetter,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["letters"]);
+      setIsEditing(false);
+      setEditingText("");
+    },
+  });
+  const { data: detailData, isLoading } = useQuery({
+    queryKey: ["letters"],
+    queryFn: getLettersFromDB,
+    select: (letters) => {
+      return letters.find((letter) => letter.id === id);
+    },
+  });
+
+  // const detailData = letters.find((letter) => letter.id === id);
 
   const onDeleteBtn = () => {
     const answer = window.confirm("정말로 삭제하시겠습니까?");
     if (!answer) return;
-
-    dispatch(__deleteLetter(id));
-    navigate("/");
+    mutateToDelete(id);
+    // dispatch(__deleteLetter(id));
+    // navigate("/");
   };
   const onEditDone = () => {
     if (!editingText) return alert("수정사항이 없습니다.");
 
-    dispatch(__editLetter({ id, editingText }));
-    setIsEditing(false);
-    setEditingText("");
+    mutateToEdit({ id, editingText });
+    // dispatch(__editLetter({ id, editingText }));
+    // setIsEditing(false);
+    // setEditingText("");
   };
+
+  if (isLoading) {
+  }
 
   return (
     <Container>

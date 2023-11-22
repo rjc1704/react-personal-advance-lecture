@@ -1,14 +1,25 @@
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import LetterCard from "./LetterCard";
+import { useQuery } from "@tanstack/react-query";
+import { getLettersFromDB } from "api/queryFns";
 
 export default function LetterList() {
   const activeMember = useSelector((state) => state.member);
-  const { letters } = useSelector((state) => state.letters);
+  // const { letters } = useSelector((state) => state.letters);
 
-  const filteredLetters = letters.filter(
+  const { data: letters, isLoading } = useQuery({
+    queryKey: ["letters"],
+    queryFn: getLettersFromDB,
+  });
+
+  const filteredLetters = letters?.filter(
     (letter) => letter.writedTo === activeMember
   );
+
+  if (isLoading) {
+    return <p>로딩중...</p>;
+  }
 
   return (
     <ListWrapper>

@@ -2,12 +2,22 @@ import { useState } from "react";
 import styled from "styled-components";
 import { v4 as uuid } from "uuid";
 import Button from "./common/Button";
-import { useDispatch } from "react-redux";
-import { addLetter, __addLetter } from "redux/modules/letterSlice";
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { addLetter } from "api/mutateFns";
 
 export default function AddForm() {
   // const { setLetters } = useContext(LetterContext);
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+  const { mutate: mutateToAdd } = useMutation({
+    mutationFn: addLetter,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["letters"]);
+      setNickname("");
+      setContent("");
+    },
+  });
 
   const [nickname, setNickname] = useState("");
   const [content, setContent] = useState("");
@@ -25,10 +35,10 @@ export default function AddForm() {
       writedTo: member,
       createdAt: new Date(),
     };
-
-    dispatch(__addLetter(newLetter));
-    setNickname("");
-    setContent("");
+    mutateToAdd(newLetter);
+    // dispatch(__addLetter(newLetter));
+    // setNickname("");
+    // setContent("");
   };
 
   return (
