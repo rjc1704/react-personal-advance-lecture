@@ -8,10 +8,12 @@ import { getFormattedDate } from "util/date";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getLettersFromDB } from "api/queryFns";
 import { deleteLetter, editLetter } from "api/mutateFns";
+import { useSelector } from "react-redux";
 
 export default function Detail() {
   const [isEditing, setIsEditing] = useState(false);
   const [editingText, setEditingText] = useState("");
+  const userId = useSelector((state) => state.auth.userId);
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -39,8 +41,6 @@ export default function Detail() {
     },
   });
 
-  // const detailData = letters.find((letter) => letter.id === id);
-
   const onDeleteBtn = () => {
     const answer = window.confirm("정말로 삭제하시겠습니까?");
     if (!answer) return;
@@ -58,7 +58,10 @@ export default function Detail() {
   };
 
   if (isLoading) {
+    return <p>로딩중...</p>;
   }
+
+  const isMyLetter = detailData.userId === userId;
 
   return (
     <Container>
@@ -92,10 +95,12 @@ export default function Detail() {
         ) : (
           <>
             <Content>{detailData?.content}</Content>
-            <BtnsWrapper>
-              <Button text="수정" onClick={() => setIsEditing(true)} />
-              <Button text="삭제" onClick={onDeleteBtn} />
-            </BtnsWrapper>
+            {isMyLetter && (
+              <BtnsWrapper>
+                <Button text="수정" onClick={() => setIsEditing(true)} />
+                <Button text="삭제" onClick={onDeleteBtn} />
+              </BtnsWrapper>
+            )}
           </>
         )}
       </DetailWrapper>
