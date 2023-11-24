@@ -37,8 +37,6 @@ export default function Login() {
     onSuccess: () => {
       setInLogin(true);
       resetInput();
-      // setId("");
-      // setPassword("");
       alert("회원가입에 성공했습니다. 로그인 해주세요.");
     },
     onError: (error) => {
