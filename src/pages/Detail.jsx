@@ -45,16 +45,11 @@ export default function Detail() {
     const answer = window.confirm("정말로 삭제하시겠습니까?");
     if (!answer) return;
     mutateToDelete(id);
-    // dispatch(__deleteLetter(id));
-    // navigate("/");
   };
   const onEditDone = () => {
     if (!editingText) return alert("수정사항이 없습니다.");
 
     mutateToEdit({ id, editingText });
-    // dispatch(__editLetter({ id, editingText }));
-    // setIsEditing(false);
-    // setEditingText("");
   };
 
   if (isLoading) {

@@ -50,7 +50,6 @@ export default function Profile() {
       }));
     } else {
       const objUrl = URL.createObjectURL(file);
-      // setImgUrl(objUrl);
       queryClient.setQueryData(["profile"], (prev) => ({
         ...prev,
         avatar: objUrl,
@@ -94,9 +93,6 @@ export default function Profile() {
     setEditingNickname("");
   };
 
-  // useEffect(() => {
-  //   getProfile();
-  // }, []);
   if (isLoading) {
     return <p>로딩중...</p>;
   }
@@ -111,6 +107,8 @@ export default function Profile() {
         {isEditing ? (
           <input
             name="editing"
+            maxLength={10}
+            placeholder="최대 10글자 가능"
             autoFocus
             defaultValue={profileData.nickname}
             onChange={(event) => setEditingNickname(event.target.value)}

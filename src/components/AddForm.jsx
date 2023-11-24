@@ -8,8 +8,6 @@ import { addLetter } from "api/mutateFns";
 import { useSelector } from "react-redux";
 
 export default function AddForm() {
-  // const { setLetters } = useContext(LetterContext);
-  // const dispatch = useDispatch();
   const { userId, avatar, nickname } = useSelector((state) => state.auth);
 
   const queryClient = useQueryClient();
@@ -17,12 +15,10 @@ export default function AddForm() {
     mutationFn: addLetter,
     onSuccess: () => {
       queryClient.invalidateQueries(["letters"]);
-      // setNickname("");
       setContent("");
     },
   });
 
-  // const [nickname, setNickname] = useState("");
   const [content, setContent] = useState("");
   const [member, setMember] = useState("카리나");
 
@@ -40,9 +36,6 @@ export default function AddForm() {
       userId,
     };
     mutateToAdd(newLetter);
-    // dispatch(__addLetter(newLetter));
-    // setNickname("");
-    // setContent("");
   };
 
   return (

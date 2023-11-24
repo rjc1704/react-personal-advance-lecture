@@ -6,7 +6,6 @@ import { getLettersFromDB } from "api/queryFns";
 
 export default function LetterList() {
   const activeMember = useSelector((state) => state.member);
-  // const { letters } = useSelector((state) => state.letters);
 
   const { data: letters, isLoading } = useQuery({
     queryKey: ["letters"],

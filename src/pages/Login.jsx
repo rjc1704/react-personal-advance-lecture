@@ -3,46 +3,55 @@ import Button from "components/common/Button";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { login } from "redux/modules/authSlice";
-import { authApi } from "api";
 import { useMutation } from "@tanstack/react-query";
-import { register } from "api/mutateFns";
+import { signIn, signUp } from "api/mutateFns";
+import useForm from "hooks/useForm";
 
 export default function Login() {
   const dispatch = useDispatch();
 
-  const [id, setId] = useState("");
-  const [password, setPassword] = useState("");
-  const [nickname, setNickname] = useState("");
+  const { formData, handleInputChange, resetInput } = useForm({
+    id: "",
+    password: "",
+    nickname: "",
+  });
+  const { id, password, nickname } = formData;
+
   const [inLogin, setInLogin] = useState(true);
 
+  const { mutate: mutateToLogin } = useMutation({
+    mutationFn: signIn,
+    onSuccess: (data) => {
+      if (data.success) {
+        const { accessToken, userId, avatar, nickname } = data;
+        dispatch(login({ accessToken, userId, avatar, nickname }));
+      }
+    },
+    onError: (error) => {
+      alert(error.response.data.message);
+    },
+  });
+
   const { mutate: mutateToRegister } = useMutation({
-    mutationFn: register,
+    mutationFn: signUp,
     onSuccess: () => {
       setInLogin(true);
-      setId("");
-      setPassword("");
+      resetInput();
+      // setId("");
+      // setPassword("");
       alert("회원가입에 성공했습니다. 로그인 해주세요.");
+    },
+    onError: (error) => {
+      alert(error.response.data.message);
     },
   });
 
   const handleAuth = async (event) => {
     event.preventDefault();
-    // 로그인 상태로 변경
     if (inLogin) {
-      // 서버로 로그인 요청 후 성공 시 상태변경
+      // 로그인 요청
       if (!id || !password) return alert("아이디와 비밀번호는 필수값입니다.");
-      try {
-        const result = await authApi.post("/login", {
-          id,
-          password,
-        });
-        const { accessToken, userId, avatar, nickname } = result.data;
-        if (result.status === 200) {
-          dispatch(login({ accessToken, userId, avatar, nickname }));
-        }
-      } catch (error) {
-        alert(error.response.data.message);
-      }
+      await mutateToLogin({ id, password });
     } else {
       // 회원가입 요청
       if (!id || !password || !nickname)
@@ -57,23 +66,37 @@ export default function Login() {
       <Form onSubmit={handleAuth}>
         <Title>{inLogin ? "로그인" : "회원가입"}</Title>
         <Input
-          placeholder="아이디"
-          onChange={(event) => setId(event.target.value)}
+          name="id"
+          placeholder="아이디 (4~10글자)"
+          minLength={4}
+          maxLength={10}
+          onChange={handleInputChange}
           value={id}
+          autoFocus
         />
         <Input
-          placeholder="비밀번호"
-          onChange={(event) => setPassword(event.target.value)}
+          name="password"
+          placeholder="비밀번호 (4~15글자)"
+          minLength={4}
+          maxLength={15}
+          onChange={handleInputChange}
           value={password}
         />
         {!inLogin && (
           <Input
-            placeholder="닉네임"
-            onChange={(event) => setNickname(event.target.value)}
+            name="nickname"
+            placeholder="닉네임 (1~10글자)"
+            minLength={1}
+            maxLength={10}
+            onChange={handleInputChange}
             value={nickname}
           />
         )}
-        <Button text={inLogin ? "로그인" : "회원가입"} size="large" />
+        <Button
+          text={inLogin ? "로그인" : "회원가입"}
+          size="large"
+          disabled={inLogin ? !id || !password : !id || !password || !nickname}
+        />
         <ToggleMenu>
           <span onClick={() => setInLogin((prev) => !prev)}>
             {inLogin ? "회원가입" : "로그인"}

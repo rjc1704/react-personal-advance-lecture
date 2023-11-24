@@ -7,9 +7,18 @@ export const editLetter = ({ id, editingText }) =>
 
 export const deleteLetter = (id) => jsonApi.delete(`/letters/${id}`);
 
-export const register = ({ id, password, nickname }) =>
+export const signUp = ({ id, password, nickname }) =>
   authApi.post("/register", {
     id,
     password,
     nickname,
   });
+
+export const signIn = async ({ id, password }) => {
+  const { data } = await authApi.post("/login", {
+    id,
+    password,
+  });
+
+  return data;
+};
