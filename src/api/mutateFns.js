@@ -22,3 +22,8 @@ export const signIn = async ({ id, password }) => {
 
   return data;
 };
+
+export const editProfile = async (formData) => {
+  const { data } = await authApi.post("/profile", formData, { isFile: true });
+  return data;
+};

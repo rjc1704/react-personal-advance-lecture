@@ -2,12 +2,13 @@ import Avatar from "components/common/Avatar";
 import { useState } from "react";
 import styled from "styled-components";
 import heic2any from "heic2any";
-import { authApi, jsonApi } from "api";
+import { jsonApi } from "api";
 import Button from "components/common/Button";
 import { useDispatch } from "react-redux";
 import { setProfile } from "redux/modules/authSlice";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getProfile } from "api/queryFns";
+import { editProfile } from "api/mutateFns";
 
 export default function Profile() {
   const dispatch = useDispatch();
@@ -23,6 +24,32 @@ export default function Profile() {
   } = useQuery({
     queryKey: ["profile"],
     queryFn: getProfile,
+  });
+
+  const { mutate: mutateToEditProfile } = useMutation({
+    mutationFn: editProfile,
+    onSuccess: async (data) => {
+      const newProfile = { ...data };
+      delete newProfile.message;
+      delete newProfile.success;
+      dispatch(setProfile(newProfile));
+      refetchProfile();
+
+      // db.json에도 프로필 변경사항 반영
+      const { data: myLetters } = await jsonApi.get(
+        `/letters?userId=${localStorage.getItem("userId")}`,
+        newProfile
+      );
+      if (myLetters.length > 0) {
+        const letterIds = myLetters.map((letter) => letter.id);
+        for (const letterId of letterIds) {
+          await jsonApi.patch(`/letters/${letterId}`, newProfile);
+        }
+      }
+
+      setIsEditing(false);
+      setEditingNickname("");
+    },
   });
 
   const previewImg = async (event) => {
@@ -68,29 +95,7 @@ export default function Profile() {
     if (editingNickname) {
       formData.append("nickname", editingNickname);
     }
-
-    const { data } = await authApi.post("/profile", formData, { isFile: true });
-
-    const newProfile = { ...data };
-    delete newProfile.message;
-    delete newProfile.success;
-    dispatch(setProfile(newProfile));
-    refetchProfile();
-
-    // db.json에도 프로필 변경사항 반영
-    const { data: myLetters } = await jsonApi.get(
-      `/letters?userId=${localStorage.getItem("userId")}`,
-      newProfile
-    );
-    if (myLetters.length > 0) {
-      const letterIds = myLetters.map((letter) => letter.id);
-      for (const letterId of letterIds) {
-        await jsonApi.patch(`/letters/${letterId}`, newProfile);
-      }
-    }
-
-    setIsEditing(false);
-    setEditingNickname("");
+    await mutateToEditProfile(formData);
   };
 
   if (isLoading) {
