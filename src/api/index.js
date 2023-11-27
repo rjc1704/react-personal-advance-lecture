@@ -17,12 +17,14 @@ export const authApi = axios.create({
 });
 
 jsonApi.interceptors.request.use(
-  (config) => {
+  async (config) => {
     const accessToken = localStorage.getItem("accessToken");
     if (accessToken) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;
     }
-    return config;
+    // 모든 json-server api는 accessToken이 유효한 경우에만 이용 가능하게 합니다.
+    const { data } = await authApi.get("/user");
+    if (data.success) return config;
   },
   (error) => {
     store.dispatch(logout());
