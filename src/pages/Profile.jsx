@@ -9,6 +9,7 @@ import { setProfile } from "redux/modules/authSlice";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getProfile } from "api/queryFns";
 import { editProfile } from "api/mutateFns";
+import { toast } from "react-toastify";
 
 export default function Profile() {
   const dispatch = useDispatch();
@@ -56,7 +57,7 @@ export default function Profile() {
     const file = event.target.files[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
-      return alert("파일 사이즈는 최대 5MB 까지 허용합니다.");
+      return toast.warn("파일 사이즈는 최대 5MB 까지 허용합니다.");
     }
 
     setImgFile(file);

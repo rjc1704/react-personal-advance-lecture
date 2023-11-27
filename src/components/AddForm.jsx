@@ -6,6 +6,7 @@ import Button from "./common/Button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addLetter } from "api/mutateFns";
 import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 export default function AddForm() {
   const { userId, avatar, nickname } = useSelector((state) => state.auth);
@@ -24,7 +25,7 @@ export default function AddForm() {
 
   const onAddLetter = (event) => {
     event.preventDefault();
-    if (!content) return alert("닉네임과 내용은 필수값입니다.");
+    if (!content) return toast.warn("내용은 필수값입니다.");
 
     const newLetter = {
       id: uuid(),

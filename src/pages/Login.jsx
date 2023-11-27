@@ -6,6 +6,7 @@ import { login } from "redux/modules/authSlice";
 import { useMutation } from "@tanstack/react-query";
 import { signIn, signUp } from "api/mutateFns";
 import useForm from "hooks/useForm";
+import { toast } from "react-toastify";
 
 export default function Login() {
   const dispatch = useDispatch();
@@ -25,10 +26,11 @@ export default function Login() {
       if (data.success) {
         const { accessToken, userId, avatar, nickname } = data;
         dispatch(login({ accessToken, userId, avatar, nickname }));
+        toast.success("로그인에 성공했습니다.");
       }
     },
     onError: (error) => {
-      alert(error.response.data.message);
+      toast.error(error.response.data.message);
     },
   });
 
@@ -37,10 +39,10 @@ export default function Login() {
     onSuccess: () => {
       setInLogin(true);
       resetInput();
-      alert("회원가입에 성공했습니다. 로그인 해주세요.");
+      toast.success("회원가입에 성공했습니다. 로그인 해주세요.");
     },
     onError: (error) => {
-      alert(error.response.data.message);
+      toast.error(error.response.data.message);
     },
   });
 
@@ -48,12 +50,13 @@ export default function Login() {
     event.preventDefault();
     if (inLogin) {
       // 로그인 요청
-      if (!id || !password) return alert("아이디와 비밀번호는 필수값입니다.");
+      if (!id || !password)
+        return toast.warn("아이디와 비밀번호는 필수값입니다.");
       await mutateToLogin({ id, password });
     } else {
       // 회원가입 요청
       if (!id || !password || !nickname)
-        return alert("아이디, 비밀번호, 닉네임은 필수값입니다.");
+        return toast.warn("아이디, 비밀번호, 닉네임은 필수값입니다.");
 
       await mutateToRegister({ id, password, nickname });
     }

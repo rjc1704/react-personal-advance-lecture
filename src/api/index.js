@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "react-toastify";
 import store from "redux/config/configStore";
 import { logout } from "redux/modules/authSlice";
 
@@ -42,7 +43,7 @@ jsonApi.interceptors.response.use(
       "토큰이 만료되었습니다. 다시 로그인 해주세요."
     ) {
       store.dispatch(logout());
-      return alert(error.response.data.message);
+      return toast.error(error.response.data.message);
     }
     return Promise.reject(error);
   }
@@ -76,7 +77,7 @@ authApi.interceptors.response.use(
       "토큰이 만료되었습니다. 다시 로그인 해주세요."
     ) {
       store.dispatch(logout());
-      return alert(error.response.data.message);
+      return toast.warn(error.response.data.message);
     }
     return Promise.reject(error);
   }

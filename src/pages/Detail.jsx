@@ -9,6 +9,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getLettersFromDB } from "api/queryFns";
 import { deleteLetter, editLetter } from "api/mutateFns";
 import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 export default function Detail() {
   const [isEditing, setIsEditing] = useState(false);
@@ -47,7 +48,7 @@ export default function Detail() {
     mutateToDelete(id);
   };
   const onEditDone = () => {
-    if (!editingText) return alert("수정사항이 없습니다.");
+    if (!editingText) return toast.warn("수정사항이 없습니다.");
 
     mutateToEdit({ id, editingText });
   };
