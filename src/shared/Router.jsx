@@ -2,11 +2,11 @@ import Detail from "pages/Detail";
 import Home from "pages/Home";
 import Login from "pages/Login";
 import Profile from "pages/Profile";
-import { useState } from "react";
+import { useSelector } from "react-redux";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 export default function Router() {
-  const [isLogin, setIsLogin] = useState(false);
+  const isLogin = useSelector((state) => state.auth.isLogin);
   return (
     <BrowserRouter>
       <Routes>
