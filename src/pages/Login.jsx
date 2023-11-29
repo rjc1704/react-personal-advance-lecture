@@ -27,8 +27,9 @@ export default function Login() {
           id,
           password,
         });
+        const { accessToken, avatar, nickname, userId } = data;
         if (data.success) {
-          dispatch(login(data.accessToken));
+          dispatch(login({ accessToken, avatar, nickname, userId }));
           toast.success("로그인 성공");
         }
       } catch (err) {
