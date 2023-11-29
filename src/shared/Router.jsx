@@ -1,3 +1,4 @@
+import Layout from "components/Layout";
 import Detail from "pages/Detail";
 import Home from "pages/Home";
 import Login from "pages/Login";
@@ -11,12 +12,12 @@ export default function Router() {
     <BrowserRouter>
       <Routes>
         {isLogin ? (
-          <>
+          <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
             <Route path="/detail/:id" element={<Detail />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="*" element={<Navigate replace to="/" />} />
-          </>
+          </Route>
         ) : (
           <>
             <Route path="/login" element={<Login />} />
