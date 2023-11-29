@@ -5,6 +5,7 @@ import { login } from "redux/modules/authSlice";
 import styled from "styled-components";
 import { toast } from "react-toastify";
 import useForm from "hooks/useForm";
+import { authApi } from "api";
 
 export default function Login() {
   const dispatch = useDispatch();
@@ -17,20 +18,38 @@ export default function Login() {
   });
   const { id, password, nickname } = formState;
 
-  const onSubmitHandler = (event) => {
+  const onSubmitHandler = async (event) => {
     event.preventDefault();
-    console.log("제출");
     if (isLoginMode) {
       // 로그인 처리
-      dispatch(login());
-
-      toast.success("로그인 성공");
+      try {
+        const { data } = await authApi.post("/login", {
+          id,
+          password,
+        });
+        if (data.success) {
+          dispatch(login(data.accessToken));
+          toast.success("로그인 성공");
+        }
+      } catch (err) {
+        toast.error(err.response.data.message);
+      }
     } else {
       // 회원가입 처리
-      setIsLoginMode(true);
-      resetForm();
-
-      toast.success("회원가입 성공");
+      try {
+        const { data } = await authApi.post("/register", {
+          id,
+          password,
+          nickname,
+        });
+        if (data.success) {
+          setIsLoginMode(true);
+          resetForm();
+          toast.success("회원가입 성공");
+        }
+      } catch (err) {
+        toast.error(err.response.data.message);
+      }
     }
   };
 
