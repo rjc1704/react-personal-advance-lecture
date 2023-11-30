@@ -28,23 +28,6 @@ jsonApi.interceptors.request.use(
     if (data.success) return config;
   },
   (error) => {
-    store.dispatch(logout());
-    return Promise.reject(error);
-  }
-);
-
-jsonApi.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    if (
-      error.response.data.message ===
-      "토큰이 만료되었습니다. 다시 로그인 해주세요."
-    ) {
-      store.dispatch(logout());
-      return toast.error(error.response.data.message);
-    }
     return Promise.reject(error);
   }
 );
@@ -62,7 +45,6 @@ authApi.interceptors.request.use(
     return config;
   },
   (error) => {
-    store.dispatch(logout());
     return Promise.reject(error);
   }
 );
