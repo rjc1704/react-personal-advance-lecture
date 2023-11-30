@@ -1,7 +1,7 @@
 import Button from "components/common/Button";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { login } from "redux/modules/authSlice";
+import { __login } from "redux/modules/authSlice";
 import styled from "styled-components";
 import { toast } from "react-toastify";
 import useForm from "hooks/useForm";
@@ -21,20 +21,7 @@ export default function Login() {
   const onSubmitHandler = async (event) => {
     event.preventDefault();
     if (isLoginMode) {
-      // 로그인 처리
-      try {
-        const { data } = await authApi.post("/login", {
-          id,
-          password,
-        });
-        const { accessToken, avatar, nickname, userId } = data;
-        if (data.success) {
-          dispatch(login({ accessToken, avatar, nickname, userId }));
-          toast.success("로그인 성공");
-        }
-      } catch (err) {
-        toast.error(err.response.data.message);
-      }
+      dispatch(__login({ id, password }));
     } else {
       // 회원가입 처리
       try {
