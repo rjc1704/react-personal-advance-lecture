@@ -44,6 +44,15 @@
       "writedTo": "카리나",
       "createdAt": "Thu Nov 30 2023 16:27:56 GMT+0900 (Korean Standard Time)",
       "userId": "asdf"
+    },
+    {
+      "id": "5fe5f3ad-a7d1-4cdf-9f2c-9c64e833ba13",
+      "nickname": "바뀐닉네임쓰",
+      "content": "수정쓰",
+      "avatar": "https://react-jwt-avatar.s3.ap-northeast-2.amazonaws.com/23-11-28/e572085c-4a86-4ffd-afca-2393c4cbf943.jpg",
+      "writedTo": "카리나",
+      "createdAt": "Thu Nov 30 2023 21:20:54 GMT+0900 (Korean Standard Time)",
+      "userId": "abcabc"
     }
   ]
 }
