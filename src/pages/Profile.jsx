@@ -1,22 +1,26 @@
 import styled from "styled-components";
 import Avatar from "components/common/Avatar";
 import Button from "components/common/Button";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { __editProfile } from "redux/modules/authSlice";
 
 export default function Profile() {
+  const dispatch = useDispatch();
   const { avatar, nickname, userId } = useSelector((state) => state.auth);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editingText, setEditingText] = useState("");
   const [selectedImg, setSelectedImg] = useState(avatar);
+  const [file, setFile] = useState(null);
 
   const previewImg = (event) => {
     const imgFile = event.target.files[0];
     if (imgFile.size > 1024 * 1024) {
       return toast.warn("최대 1MB까지 업로드 가능합니다.");
     }
+    setFile(imgFile);
     // 프리뷰 구현
     // File -> Url 형식으로 변환
     const imgUrl = URL.createObjectURL(imgFile);
@@ -25,8 +29,15 @@ export default function Profile() {
 
   const onEditDone = () => {
     // TODO: 프로필 변경 요청
-
-    toast.success("프로필 변경이 완료 되었습니다.");
+    const formData = new FormData();
+    if (editingText) {
+      formData.append("nickname", editingText);
+    }
+    if (selectedImg !== avatar) {
+      formData.append("avatar", file);
+    }
+    dispatch(__editProfile(formData));
+    setIsEditing(false);
   };
 
   return (
