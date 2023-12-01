@@ -4,18 +4,33 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { getFormattedDate } from "util/date";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  __deleteLetter,
-  __editLetter,
-  __getLetters,
-} from "redux/modules/letterSlice";
-import { useEffect } from "react";
+import { useSelector } from "react-redux";
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+import { getLetters } from "api/queryFns";
+import { deleteLetter, editLetter } from "api/mutationFns";
 
 export default function Detail() {
-  const dispatch = useDispatch();
-  const { letters, isLoading } = useSelector((state) => state.letters);
   const myUserId = useSelector((state) => state.auth.userId);
+
+  const { data: letters, isLoading } = useQuery({
+    queryKey: ["letters"],
+    queryFn: getLetters,
+  });
+  const queryClient = useQueryClient();
+  const { mutate: mutateToDelete } = useMutation({
+    mutationFn: deleteLetter,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries(["letters"]);
+    },
+  });
+  const { mutate: mutateToEdit } = useMutation({
+    mutationFn: editLetter,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries(["letters"]);
+    },
+  });
 
   const [isEditing, setIsEditing] = useState(false);
   const [editingText, setEditingText] = useState("");
@@ -25,20 +40,17 @@ export default function Detail() {
   const onDeleteBtn = () => {
     const answer = window.confirm("정말로 삭제하시겠습니까?");
     if (!answer) return;
-
-    dispatch(__deleteLetter(id));
+    mutateToDelete(id);
     navigate("/");
   };
   const onEditDone = () => {
     if (!editingText) return alert("수정사항이 없습니다.");
 
-    dispatch(__editLetter({ id, editingText }));
+    mutateToEdit({ id, editingText });
+
     setIsEditing(false);
     setEditingText("");
   };
-  useEffect(() => {
-    dispatch(__getLetters());
-  }, [dispatch]);
 
   if (isLoading) {
     return <p>로딩중...</p>;

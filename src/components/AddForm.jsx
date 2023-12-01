@@ -2,14 +2,23 @@ import { useState } from "react";
 import styled from "styled-components";
 import { v4 as uuid } from "uuid";
 import Button from "./common/Button";
-import { useDispatch, useSelector } from "react-redux";
-import { __addLetter } from "redux/modules/letterSlice";
+import { useSelector } from "react-redux";
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { addLetter } from "api/mutationFns";
 
 export default function AddForm() {
-  const dispatch = useDispatch();
   const { avatar, nickname, userId } = useSelector((state) => state.auth);
   const [content, setContent] = useState("");
   const [member, setMember] = useState("카리나");
+
+  const queryClient = useQueryClient();
+  const { mutate: mutateToAdd } = useMutation({
+    mutationFn: addLetter,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries(["letters"]);
+    },
+  });
 
   const onAddLetter = (event) => {
     event.preventDefault();
@@ -25,7 +34,7 @@ export default function AddForm() {
       userId,
     };
 
-    dispatch(__addLetter(newLetter));
+    mutateToAdd(newLetter);
     setContent("");
   };
 
